@@ -1,0 +1,12 @@
+#define rear_fwd GPIO_NUM_4
+#define rear_rev GPIO_NUM_16
+#define front_fwd GPIO_NUM_17
+#define front_rev GPIO_NUM_18
+#define rear_clock GPIO_NUM_19
+#define rear_data GPIO_NUM_21
+#define front_data GPIO_NUM_22
+#define front_clock GPIO_NUM_23
+#define right_dn GPIO_NUM_25
+#define right_up GPIO_NUM_33
+#define left_up GPIO_NUM_35
+#define left_dn GPIO_NUM_39
