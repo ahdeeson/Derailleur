@@ -54,7 +54,7 @@ struct Motor {
   gpio_num_t revPin;
   int pidIntegral;
   int *position_ptr;
-  
+  //git tst
 }
 
 //Interupt handler for position reading
