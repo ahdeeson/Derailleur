@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <inttypes.h>
 #include "freertos/FreeRTOS.h"
 #include "esp_timer.h"
@@ -35,6 +36,7 @@ int r_gear = 0;
 const int f_speeds = 2;
 const int f_positions[] = {500, 550};
 int f_gear = 0;
+int new_data = 0;
 
 struct Caliper {
     const int cycleTime;
@@ -52,22 +54,24 @@ struct Caliper {
 struct Motor {
   gpio_num_t fwdPin;
   gpio_num_t revPin;
+  long last_t;
   int pidIntegral;
-  int *position_ptr;
-  //git tst
 }
 
 //Interupt handler for position reading
 static void IRAM_ATTR caliper_isr(struct Caliper c) {
-    c.now = esp_timer_get_time();
-    c.clockFlag = 1;
-    c.dataIn = gpio_get_level(c.data);
-    vTaskDelete(NULL);
+  c.now = esp_timer_get_time();
+  c.clockFlag = 1;
+  new_data = 1;
+  c.dataIn = gpio_get_level(c.data);
+  vTaskDelete(NULL);
 }
 
 void decode(struct Caliper c) {
     if((c.now - c.lastInterrupt) > c.cycleTime) {
-        c.finalValue = c.value * c.sign;
+      long new_v = c.value * c.sign;
+      // pid_calc(c.motor, new_v, c.finalValue);
+        c.finalValue = new_v
         c.currentBit = 0;
         c.value = 0;
         c.sign = 1;
@@ -115,12 +119,15 @@ void gpio_setup(struct Caliper front, struct Caliper rear){
     gpio_intr_enable(rear_clock);
 }
 
-int PID_calc(struct Caliper caliper, int setpoint) {
-    int error;
-    int Kp = 1, Ki = 1, Kd = 1;    
-
-    error = setpoint - caliper.finalValue;
-    return ;
+void PID_calc(struct Motor m, long pos, long pre_pos) {
+  /* int error;
+    int Kp = 1, Ki = 1, Kd = 1;
+    error = setpoint - *m.position_ptr;
+    if(abs(error) > 5){
+      int d_t = esp_timer_get_time() - m.last_t;
+      m.pidIntegral += (d_t) * error;
+      int derivative = () / d_t
+      }*/
 }
 
 void app_main(void) {
@@ -140,7 +147,12 @@ void app_main(void) {
     gpio_setup(front_caliper, rear_caliper);
     
     while(0 == 0) {
-        if(left_buttons[UP] == 0 && left_buttons[DOWN] == 0) {
+      vTaskDelay(configTICK_RATE_HZ / 1000);
+      if(new_data){
+	printf("%d\t%d\n", front_caliper.now, rear_caliper.now);
+	new_data = 0;
+      }
+      /*if(left_buttons[UP] == 0 && left_buttons[DOWN] == 0) {
             if(left_state == UP && f_gear < (f_speeds - 1)) f_gear++;
             if(left_state == DOWN && f_gear != 0) f_gear--;
             left_state = BASE;
@@ -158,9 +170,6 @@ void app_main(void) {
         else if(right_buttons[UP] == 0 && right_buttons[DOWN] == 1 && right_state == BASE) right_state = DOWN;
         else if(right_buttons[UP] == 1 && right_buttons[DOWN] == 1) right_state = CANCEL;
 
-        rear_speed = PID_calc(rear_caliper, r_positions[r_gear]);
-        front_speed = PID_calc(front_caliper, f_positions[f_gear]);
-
         if(front_caliper.clockFlag) {
             decode(front_caliper);
             front_caliper.clockFlag = 0;
@@ -168,6 +177,6 @@ void app_main(void) {
         if(rear_caliper.clockFlag) {
             decode(rear_caliper);
             rear_caliper.clockFlag = 0;
-        }
+	    }*/
     }
 }
