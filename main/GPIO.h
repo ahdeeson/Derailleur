@@ -8,5 +8,5 @@
 #define front_clock GPIO_NUM_23
 #define right_dn GPIO_NUM_25
 #define right_up GPIO_NUM_33
-#define left_up GPIO_NUM_35
-#define left_dn GPIO_NUM_39
+#define left_dn GPIO_NUM_35
+#define left_up GPIO_NUM_39
